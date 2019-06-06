@@ -1,9 +1,4 @@
 const { user: User } = require('../models');
 
-exports.createUser = userData =>
-  User.create(userData).catch(err => {
-    throw err.errors.reduce((acc, error) => {
-      acc.push(error.message);
-      return acc;
-    }, []);
-  });
+exports.createUser = ({ email, ...otherUserData }) =>
+  User.findOrCreate({ where: { email }, default: otherUserData });
