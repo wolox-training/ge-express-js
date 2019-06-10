@@ -17,7 +17,7 @@ exports.signUp = (req, res, next) =>
     )
     .catch(err => {
       logger.error(`Error creating user: ${err}`);
-      next(defaultError(err));
+      return defaultError(err);
     });
 
 exports.signIn = (req, res, next) =>
@@ -36,5 +36,5 @@ exports.signIn = (req, res, next) =>
     })
     .catch(err => {
       logger.error(`Error signin in: ${err}`);
-      next(defaultError(err));
+      return defaultError(err);
     });

@@ -7,7 +7,7 @@ exports.getAlbums = (req, res) =>
     .then(response => res.status(200).send(response))
     .catch(err => {
       logger.error(`Error getting albums: ${err.message}`);
-      return res.status(err.statusCode).send(apiError(err.message));
+      return apiError(err.message);
     });
 
 exports.getAlbumPhotos = (req, res) =>
@@ -15,5 +15,5 @@ exports.getAlbumPhotos = (req, res) =>
     .then(response => res.status(200).send(response))
     .catch(err => {
       logger.error(`Error getting album photos: ${err}`);
-      return res.status(err.statusCode).send(apiError(err.message));
+      return apiError(err.message);
     });
