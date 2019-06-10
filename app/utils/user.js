@@ -1,25 +1,35 @@
+const {
+  MISSING_NAME,
+  MISSING_LAST_NAME,
+  PASSWORD_TOO_SHORT,
+  PASSWORD_FORMAT_INVALID,
+  MISSING_PASSWORD,
+  MISSING_EMAIL,
+  EMAIL_FORMAT_INVALID
+} = require('../errors');
+
 exports.validateUserData = data => {
   const errors = [];
   if (!data.name) {
-    errors.push('Missing name');
+    errors.push(MISSING_NAME);
   }
   if (!data.lastName) {
-    errors.push('Missing last name');
+    errors.push(MISSING_LAST_NAME);
   }
   if (data.password) {
     if (data.password.length < 8) {
-      errors.push('Password too short');
+      errors.push(PASSWORD_TOO_SHORT);
     }
     if (!data.password.match(/^[a-zA-Z0-9_]*$/)) {
-      errors.push('Password format invalid');
+      errors.push(PASSWORD_FORMAT_INVALID);
     }
   } else {
-    errors.push('Missing password');
+    errors.push(MISSING_PASSWORD);
   }
   if (!data.email) {
-    errors.push('Missing email');
+    errors.push(MISSING_EMAIL);
   } else if (!data.email.match(/\S+@\S+\.\S+/)) {
-    errors.push('Email format invalid');
+    errors.push(EMAIL_FORMAT_INVALID);
   }
   return errors;
 };
