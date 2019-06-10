@@ -11,3 +11,13 @@ exports.encrypt = text =>
       return resolve(hash);
     })
   );
+
+exports.compareEncryptedData = (data, hash) =>
+  new Promise((resolve, reject) =>
+    bcrypt.compare(data, hash, (err, res) => {
+      if (err) {
+        return reject(err);
+      }
+      return resolve(res);
+    })
+  );
