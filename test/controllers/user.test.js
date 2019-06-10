@@ -20,7 +20,7 @@ const mentallyChallengedUser = {
   email: 'yes'
 };
 
-describe('users api', () => {
+describe('users POST', () => {
   it('should create an user', done =>
     request(app)
       .post('/users')
