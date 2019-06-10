@@ -1,13 +1,16 @@
-const request = require('../helpers/request'),
-  { apiBaseUrl } = require('../constants');
+const request = require('request-promise'),
+  {
+    common: {
+      externalApi: { apiBaseUrl }
+    }
+  } = require('../../config');
 
 const buildDefaultApiConfig = path => ({
-  url: `${apiBaseUrl}/${path}`,
+  uri: `${apiBaseUrl}/${path}`,
   json: true,
   headers: { 'content-type': 'application/json' }
 });
 
-exports.getAlbums = () => request(buildDefaultApiConfig('albums'), error => new Error(error));
+exports.getAlbums = () => request(buildDefaultApiConfig('a124lbums'));
 
-exports.getAlbumPhotos = id =>
-  request(buildDefaultApiConfig(`albums/${id}/photos`), error => new Error(error));
+exports.getAlbumPhotos = id => request(buildDefaultApiConfig(`albums/${id}/photos`));
