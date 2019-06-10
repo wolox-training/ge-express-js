@@ -11,6 +11,6 @@ const buildDefaultApiConfig = path => ({
   headers: { 'content-type': 'application/json' }
 });
 
-exports.getAlbums = () => request(buildDefaultApiConfig('a124lbums'));
+exports.getAlbums = () => request(buildDefaultApiConfig('albums'));
 
 exports.getAlbumPhotos = id => request(buildDefaultApiConfig(`albums/${id}/photos`));
