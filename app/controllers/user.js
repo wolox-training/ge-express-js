@@ -1,5 +1,5 @@
 const logger = require('../logger'),
-  { createUser, getUserByEmail, getUsers } = require('../services/user'),
+  { createUser, getUserByEmail, getUsers, createOrUpdateToAdminUser } = require('../services/user'),
   { encrypt, compareEncryptedData } = require('../utils/encrypt'),
   { defaultError, emailExistsError } = require('../errors'),
   {
@@ -31,7 +31,7 @@ exports.signIn = (req, res, next) =>
       }
       return compareEncryptedData(req.body.password, user.password).then(isValid => {
         if (isValid) {
-          const token = jwt.sign({ userId: user.id, admin: true }, secret);
+          const token = jwt.sign({ userId: user.id, admin: user.admin }, secret);
           return res.status(200).send(token);
         }
         return res.status(401).send('Unauthorized');
@@ -49,3 +49,21 @@ exports.getUsers = (req, res, next) =>
       logger.error(`Error getting users: ${err}`);
       return next(defaultError(err));
     });
+
+exports.createAdminUser = (req, res, next) =>
+  encrypt(req.body.password).then(encryptedPassword =>
+    createOrUpdateToAdminUser(
+      {
+        name: req.body.name,
+        lastName: req.body.lastName,
+        email: req.body.email,
+        password: encryptedPassword
+      },
+      next
+    )
+      .then(() => res.status(200).send())
+      .catch(err => {
+        logger.error(`Error creating admin user: ${err}`);
+        next();
+      })
+  );

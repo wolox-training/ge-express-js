@@ -12,3 +12,13 @@ exports.getUsers = ({ page }, next) =>
   User.findAll({ limit: DEFAULT_PAGE_LIMIT, offset: page ? (page - 1) * DEFAULT_PAGE_LIMIT : 0 }).catch(err =>
     next(databaseError(err))
   );
+
+exports.createOrUpdateToAdminUser = ({ email, ...otherUserData }, next) =>
+  User.findOrCreate({ where: { email }, defaults: { ...otherUserData, admin: true } })
+    .then(([user, created]) => {
+      if (!created && !user.admin) {
+        return user.update({ admin: true });
+      }
+      return user;
+    })
+    .catch(err => next(databaseError(err)));
