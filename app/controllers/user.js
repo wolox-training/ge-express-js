@@ -5,7 +5,14 @@ const logger = require('../logger'),
 
 exports.signUp = (req, res, next) =>
   encrypt(req.body.password)
-    .then(encryptedPassword => createUser({ ...req.body, password: encryptedPassword }))
+    .then(encryptedPassword =>
+      createUser({
+        name: req.body.name,
+        lastName: req.body.lastName,
+        email: req.body.email,
+        password: encryptedPassword
+      })
+    )
     .then(([user, created]) => {
       if (created) {
         return res.status(201).send(user);
