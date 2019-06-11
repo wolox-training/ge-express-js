@@ -1,6 +1,10 @@
-const bcrypt = require('bcryptjs');
-
-const saltRounds = 10;
+const { DEFAULT_SALT_ROUNDS } = require('../constants');
+const bcrypt = require('bcryptjs'),
+  {
+    common: {
+      api: { saltRounds = DEFAULT_SALT_ROUNDS }
+    }
+  } = require('../../config');
 
 exports.encrypt = text =>
   new Promise((resolve, reject) =>

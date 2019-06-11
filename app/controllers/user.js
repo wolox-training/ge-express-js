@@ -1,7 +1,7 @@
 const logger = require('../logger'),
   { createUser, getUserByEmail, getUsers } = require('../services/user'),
   { encrypt, compareEncryptedData } = require('../utils/encrypt'),
-  { defaultError } = require('../errors'),
+  { defaultError, emailExistsError } = require('../errors'),
   {
     common: {
       session: { secret }
@@ -12,9 +12,12 @@ const logger = require('../logger'),
 exports.signUp = (req, res, next) =>
   encrypt(req.body.password)
     .then(encryptedPassword => createUser({ ...req.body, password: encryptedPassword }, next))
-    .then(([user, created]) =>
-      res.status(created ? 201 : 409).send(created ? user : ['Email already registered'])
-    )
+    .then(([user, created]) => {
+      if (created) {
+        return res.status(201).send(user);
+      }
+      return next(emailExistsError('Email already in use'));
+    })
     .catch(err => {
       logger.error(`Error creating user: ${err}`);
       return next(defaultError(err));

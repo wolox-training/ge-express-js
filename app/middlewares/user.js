@@ -5,12 +5,12 @@ const { validateUserData } = require('../utils/user'),
       session: { secret }
     }
   } = require('../../config'),
-  { authenticationError } = require('../errors');
+  { authenticationError, invalidUserError } = require('../errors');
 
 exports.validateUserSignUpData = (req, res, next) => {
   const validationErrors = validateUserData(req.body);
   if (validationErrors.length) {
-    return res.status(400).send(validationErrors);
+    return next(invalidUserError(validationErrors));
   }
   return next();
 };
