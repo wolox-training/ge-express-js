@@ -11,3 +11,6 @@ exports.defaultError = message => internalError(message, exports.DEFAULT_ERROR);
 
 exports.API_ERROR = 'api_error';
 exports.apiError = message => internalError(message, exports.API_ERROR);
+
+exports.AUTHENTICATION_ERROR = 'authentication_error';
+exports.authenticationError = message => internalError(message, exports.AUTHENTICATION_ERROR);
