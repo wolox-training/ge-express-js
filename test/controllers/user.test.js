@@ -1,5 +1,7 @@
 const app = require('../../app'),
-  request = require('supertest');
+  request = require('supertest'),
+  { user: User } = require('../../app/models'),
+  { EMAIL_EXISTS_ERROR, INVALID_USER_ERROR } = require('../../app/errors');
 
 const sampleUser = { name: 'nicolas', lastName: 'L', email: 'freecandy@msn.net', password: 'abc452626' };
 const sameEmailUser = {
@@ -18,27 +20,30 @@ const mentallyChallengedUser = {
   email: 'yes'
 };
 
-describe('users api', () => {
+describe('users POST', () => {
   it('should create an user', done =>
     request(app)
       .post('/users')
       .send(sampleUser)
-      .set('Accept', 'application/json')
       .expect(201)
-      .end((err, res) => {
+      .end(err => {
         if (err) {
           return done(err);
         }
-        expect(res.body.name).toEqual(sampleUser.name);
-        expect(res.body.lastName).toEqual(sampleUser.lastName);
-        expect(res.body.email).toEqual(sampleUser.email);
-        return done();
+        return User.findOne({ where: { email: sampleUser.email } }).then(user => {
+          if (!user) {
+            return done('User not found');
+          }
+          expect(user.name).toEqual(sampleUser.name);
+          expect(user.lastName).toEqual(sampleUser.lastName);
+          expect(user.email).toEqual(sampleUser.email);
+          return done();
+        });
       }));
   it('should validate that emails are unique', done =>
     request(app)
       .post('/users')
       .send(sampleUser)
-      .set('Accept', 'application/json')
       .expect(201)
       .end(err => {
         if (err) {
@@ -47,13 +52,12 @@ describe('users api', () => {
         return request(app)
           .post('/users')
           .send(sameEmailUser)
-          .set('Accept', 'application/json')
           .expect(409)
           .end((err2, res2) => {
             if (err2) {
               return done(err2);
             }
-            expect(res2.body[0]).toBeDefined();
+            expect(res2.body.internal_code).toEqual(EMAIL_EXISTS_ERROR);
             return done();
           });
       }));
@@ -61,26 +65,25 @@ describe('users api', () => {
     request(app)
       .post('/users')
       .send(invalidPasswordUser)
-      .set('Accept', 'application/json')
       .expect(400)
       .end((err, res) => {
         if (err) {
           return done(err);
         }
-        expect(res.body[0]).toBeDefined();
+        expect(res.body.internal_code).toEqual(INVALID_USER_ERROR);
         return done();
       }));
   it('should validate minimum fields required', done =>
     request(app)
       .post('/users')
       .send(mentallyChallengedUser)
-      .set('Accept', 'application/json')
       .expect(400)
       .end((err, res) => {
         if (err) {
           return done(err);
         }
-        expect(res.body[0].length).toBeGreaterThan(3);
+        expect(res.body.internal_code).toEqual(INVALID_USER_ERROR);
+        expect(res.body.message.length).toBeGreaterThan(3);
         return done();
       }));
 });
