@@ -28,7 +28,6 @@ exports.getAlbumPhotos = (req, res) =>
 exports.buyAlbum = (req, res, next) =>
   getUserAlbums(req.user.id)
     .then(albums => {
-      console.log(albums[0].id, req.params.id);
       if (albums && albums.some(album => album.id === parseInt(req.params.id))) {
         return next(duplicateAlbumError('User already has this album'));
       }
