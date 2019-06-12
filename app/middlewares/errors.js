@@ -9,7 +9,8 @@ const statusCodes = {
   [errors.API_ERROR]: 500,
   [errors.AUTHENTICATION_ERROR]: 401,
   [errors.EMAIL_EXISTS_ERROR]: 409,
-  [errors.INVALID_USER_ERROR]: 400
+  [errors.INVALID_USER_ERROR]: 400,
+  [errors.DUPLICATE_ALBUM_ERROR]: 400
 };
 
 exports.handle = (error, req, res, next) => {

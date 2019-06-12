@@ -1,5 +1,5 @@
-module.exports = (sequelize, DataTypes) =>
-  sequelize.define('user', {
+module.exports = (sequelize, DataTypes) => {
+  const User = sequelize.define('user', {
     name: {
       type: DataTypes.STRING,
       allowNull: false
@@ -23,3 +23,8 @@ module.exports = (sequelize, DataTypes) =>
       defaultValue: false
     }
   });
+  User.associate = models => {
+    models.user.belongsToMany(models.album, { through: 'userAlbum' });
+  };
+  return User;
+};

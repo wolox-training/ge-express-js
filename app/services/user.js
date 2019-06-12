@@ -1,6 +1,7 @@
 const { user: User } = require('../models'),
   { databaseError } = require('../errors'),
-  { DEFAULT_PAGE_LIMIT } = require('../constants');
+  { DEFAULT_PAGE_LIMIT } = require('../constants'),
+  { album: Album } = require('../models');
 
 exports.createUser = ({ email, ...otherUserData }, next) =>
   User.findOrCreate({ where: { email }, defaults: otherUserData }).catch(err => next(databaseError(err)));
@@ -22,3 +23,10 @@ exports.createOrUpdateToAdminUser = ({ email, ...otherUserData }, next) =>
       return user;
     })
     .catch(err => next(databaseError(err)));
+
+exports.getUser = id => User.findOne({ where: { id } });
+
+exports.getUserAlbums = id =>
+  User.findOne({ where: { id }, include: [{ model: Album, where: { userId: id } }] }).then(
+    user => user.albums
+  );

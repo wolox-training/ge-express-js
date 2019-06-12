@@ -28,3 +28,6 @@ exports.PASSWORD_FORMAT_INVALID = 'password_format_invalid';
 exports.MISSING_PASSWORD = 'missing_password';
 exports.MISSING_EMAIL = 'missing_email';
 exports.EMAIL_FORMAT_INVALID = 'email_format_invalid';
+
+exports.DUPLICATE_ALBUM_ERROR = 'duplicate_album_error';
+exports.duplicateAlbumError = message => internalError(message, exports.DUPLICATE_ALBUM_ERROR);
