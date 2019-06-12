@@ -9,7 +9,7 @@
   "scripts": {
     "console": "node console.js",
     "cover": "NODE_ENV=testing jest --coverage --runInBand --forceExit test/app",
-    "test": "NODE_ENV=testing jest test/app --runInBand --forceExit",
+    "test": "NODE_ENV=testing jest test/app --runInBand --forceExit --passWithNoTests --detectOpenHandles",
     "test-inspect": "NODE_ENV=testing node --inspect --debug-brk jest test/app.spec.js",
     "eslint-check": "eslint --print-config .eslintrc.js --ignore-pattern ./.eslintrc.js | eslint-config-prettier-check",
     "lint": "eslint \"**/*.js\" --ignore-pattern ./.eslintrc.js",
@@ -20,7 +20,8 @@
     "pretest": "npm run lint",
     "prestart": "npm run lint",
     "migrations": "sequelize db:migrate",
-    "start": "nodemon --inspect server.js"
+    "start": "nodemon --inspect server.js",
+    "migrations-test": "NODE_ENV=testing npm run migrations"
   },
   "cacheDirectories": [
     "node_modules"
@@ -48,20 +49,20 @@
       "!**/scripts/**",
       "!**/docs/**"
     ],
-    "testEnvironment": "node",
-    "transform": {
-      "^.+\\.js$": "babel-jest"
-    }
+    "setupFilesAfterEnv": [
+      "<rootDir>/test/setup.js"
+    ]
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
     "body-parser": "^1.18.2",
     "express": "^4.16.2",
+    "express-wolox-logger": "0.0.2",
     "jwt-simple": "^0.5.1",
-    "sequelize": "^4.34.0",
     "pg": "^7.4.1",
-    "umzug": "^2.1.0",
-    "express-wolox-logger": "0.0.2"
+    "request-promise": "^4.2.4",
+    "sequelize": "^4.34.0",
+    "umzug": "^2.1.0"
   },
   "devDependencies": {
     "babel": "6.23.0",
