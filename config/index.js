@@ -36,7 +36,8 @@ const config = {
     api: {
       bodySizeLimit: process.env.API_BODY_SIZE_LIMIT,
       parameterLimit: process.env.API_PARAMETER_LIMIT,
-      port: process.env.PORT
+      port: process.env.PORT,
+      saltRounds: parseInt(process.env.SALT_ROUNDS)
     },
     externalApi: { apiBaseUrl: process.env.API_URL },
     session: {
