@@ -1,4 +1,4 @@
-const { validateUserData } = require('../utils/user'),
+const { validateUserData } = require('../validations/user'),
   { invalidUserError } = require('../errors');
 
 exports.validateUserSignUpData = (req, res, next) => {
