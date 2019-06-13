@@ -1,25 +1,14 @@
-const request = require('request-promise'),
-  {
-    common: {
-      externalApi: { apiBaseUrl }
-    }
-  } = require('../../config'),
-  { databaseError, apiError } = require('../errors'),
+const { databaseError, apiError } = require('../errors'),
   { userAlbum: UserAlbum } = require('../models'),
-  logger = require('../logger');
+  logger = require('../logger'),
+  request = require('../utils/request');
 
-const buildDefaultApiConfig = path => ({
-  uri: `${apiBaseUrl}/${path}`,
-  json: true,
-  headers: { 'content-type': 'application/json' }
-});
+exports.getAlbums = () => request('albums');
 
-exports.getAlbums = () => request(buildDefaultApiConfig('albums'));
-
-exports.getAlbumPhotos = id => request(buildDefaultApiConfig(`albums/${id}/photos`));
+exports.getAlbumPhotos = id => request(`albums/${id}/photos`);
 
 exports.getAlbum = (id, next) =>
-  request(buildDefaultApiConfig(`albums/${id}`)).catch(err => {
+  request(`albums/${id}`).catch(err => {
     if (err.statusCode === 404) {
       return null;
     }
