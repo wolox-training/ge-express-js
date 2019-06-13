@@ -3,8 +3,7 @@ const request = require('request-promise'),
     common: {
       externalApi: { apiBaseUrl }
     }
-  } = require('../../config'),
-  mockedRequest = require('../../test/mockedRequest');
+  } = require('../../config');
 
 const buildDefaultApiConfig = path => ({
   uri: `${apiBaseUrl}/${path}`,
@@ -12,8 +11,4 @@ const buildDefaultApiConfig = path => ({
   headers: { 'content-type': 'application/json' }
 });
 
-if (process.env.NODE_ENV === 'testing') {
-  module.exports = url => mockedRequest(url);
-} else {
-  module.exports = url => request(buildDefaultApiConfig(url));
-}
+module.exports = url => request(buildDefaultApiConfig(url));
