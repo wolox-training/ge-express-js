@@ -1,15 +1,10 @@
 const logger = require('../logger'),
   { createUser } = require('../services/user'),
-  { validateUserData } = require('../utils/user'),
   { encrypt } = require('../utils/encrypt'),
-  { emailExistsError, defaultError, invalidUserError } = require('../errors');
+  { emailExistsError, defaultError } = require('../errors');
 
-exports.signUp = (req, res, next) => {
-  const validationErrors = validateUserData(req.body);
-  if (validationErrors.length) {
-    return next(invalidUserError(validationErrors));
-  }
-  return encrypt(req.body.password)
+exports.signUp = (req, res, next) =>
+  encrypt(req.body.password)
     .then(encryptedPassword =>
       createUser({
         name: req.body.name,
@@ -28,4 +23,3 @@ exports.signUp = (req, res, next) => {
       logger.error(`Error creating user: ${err}`);
       return next(defaultError(err));
     });
-};
