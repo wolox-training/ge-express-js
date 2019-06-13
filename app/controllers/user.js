@@ -1,17 +1,25 @@
 const logger = require('../logger'),
   { createUser, getUserByEmail, getUsers } = require('../services/user'),
   { encrypt, compareEncryptedData } = require('../utils/encrypt'),
-  { defaultError, emailExistsError } = require('../errors'),
   {
-    common: {
-      session: { secret }
-    }
-  } = require('../../config'),
-  jwt = require('jsonwebtoken');
+    defaultError,
+    emailExistsError,
+    emailNotFoundError,
+    databaseError,
+    authenticationError
+  } = require('../errors'),
+  { getUserSessionToken } = require('../services/token');
 
 exports.signUp = (req, res, next) =>
   encrypt(req.body.password)
-    .then(encryptedPassword => createUser({ ...req.body, password: encryptedPassword }, next))
+    .then(encryptedPassword =>
+      createUser({
+        name: req.body.name,
+        lastName: req.body.lastName,
+        email: req.body.email,
+        password: encryptedPassword
+      }).catch(err => next(databaseError(err)))
+    )
     .then(([user, created]) => {
       if (created) {
         return res.status(201).send(user);
@@ -24,17 +32,18 @@ exports.signUp = (req, res, next) =>
     });
 
 exports.signIn = (req, res, next) =>
-  getUserByEmail(req.body.email, next)
+  getUserByEmail(req.body.email)
+    .catch(err => next(databaseError(err)))
     .then(user => {
       if (!user) {
-        return res.status(400).send(['Email not found']);
+        return next(emailNotFoundError('Email not found'));
       }
       return compareEncryptedData(req.body.password, user.password).then(isValid => {
         if (isValid) {
-          const token = jwt.sign({ userId: user.id, admin: true }, secret);
-          return res.status(200).send(token);
+          const token = getUserSessionToken({ userId: user.id, admin: true });
+          return res.send(token);
         }
-        return res.status(401).send('Unauthorized');
+        return next(authenticationError('Unauthorized'));
       });
     })
     .catch(err => {

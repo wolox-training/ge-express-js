@@ -1,11 +1,6 @@
-const { validateUserData } = require('../utils/user'),
-  jwt = require('jsonwebtoken'),
-  {
-    common: {
-      session: { secret }
-    }
-  } = require('../../config'),
-  { authenticationError, invalidUserError } = require('../errors');
+const { validateUserData } = require('../validations/user'),
+  { authenticationError, invalidUserError } = require('../errors'),
+  { verifyToken } = require('../services/token');
 
 exports.validateUserSignUpData = (req, res, next) => {
   const validationErrors = validateUserData(req.body);
@@ -17,7 +12,7 @@ exports.validateUserSignUpData = (req, res, next) => {
 
 exports.authenticate = (req, res, next) => {
   const { token } = req.query;
-  jwt.verify(token, secret, (err, payload) => {
+  verifyToken(token, (err, payload) => {
     if (payload && payload.admin) {
       next();
     } else {
