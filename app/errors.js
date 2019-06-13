@@ -31,3 +31,6 @@ exports.EMAIL_FORMAT_INVALID = 'email_format_invalid';
 
 exports.DUPLICATE_ALBUM_ERROR = 'duplicate_album_error';
 exports.duplicateAlbumError = message => internalError(message, exports.DUPLICATE_ALBUM_ERROR);
+
+exports.NOT_FOUND = 'not_found';
+exports.notFoundError = message => internalError(message, exports.NOT_FOUND);

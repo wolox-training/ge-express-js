@@ -4,8 +4,9 @@ const request = require('request-promise'),
       externalApi: { apiBaseUrl }
     }
   } = require('../../config'),
-  { databaseError } = require('../errors'),
-  { album: Album, user: User } = require('../models');
+  { databaseError, apiError } = require('../errors'),
+  { userAlbum: UserAlbum } = require('../models'),
+  logger = require('../logger');
 
 const buildDefaultApiConfig = path => ({
   uri: `${apiBaseUrl}/${path}`,
@@ -17,12 +18,14 @@ exports.getAlbums = () => request(buildDefaultApiConfig('albums'));
 
 exports.getAlbumPhotos = id => request(buildDefaultApiConfig(`albums/${id}/photos`));
 
-exports.getAlbum = id => request(buildDefaultApiConfig(`albums/${id}`));
+exports.getAlbum = (id, next) =>
+  request(buildDefaultApiConfig(`albums/${id}`)).catch(err => {
+    if (err.statusCode === 404) {
+      return null;
+    }
+    logger.error(err);
+    return next(apiError(err));
+  });
 
-exports.findOrCreateAlbum = (album, next) =>
-  Album.findOrCreate({ where: { id: album.id }, defaults: album }).catch(err => next(databaseError(err)));
-
-exports.sellAlbumToUser = (album, user, next) =>
-  User.findOne({ where: { id: user.id } })
-    .then(registeredUser => registeredUser.addAlbum(album))
-    .catch(err => next(databaseError(err)));
+exports.sellAlbumToUser = (albumId, user, next) =>
+  UserAlbum.create({ albumId, userId: user.id }).catch(err => next(databaseError(err)));

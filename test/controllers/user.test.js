@@ -2,38 +2,20 @@ const app = require('../../app'),
   request = require('supertest'),
   { user: User } = require('../../app/models'),
   { EMAIL_EXISTS_ERROR, INVALID_USER_ERROR } = require('../../app/errors'),
-  jwt = require('jsonwebtoken'),
   {
-    common: {
-      session: { secret }
-    }
-  } = require('../../config');
+    authorizedUserToken,
+    unauthorizedUserToken,
+    sampleUser,
+    sameEmailUser,
+    invalidPasswordUser,
+    mentallyChallengedUser,
+    loggedUser
+  } = require('../mocks/user');
 
-const authorizedUserToken = jwt.sign({ admin: true }, secret);
-const unauthorizedUserToken = jwt.sign({ admin: false }, secret);
-const sampleUser = {
-  name: 'nicolas',
-  lastName: 'L',
-  email: 'freecandy@msn.net',
-  password: 'abc452626'
-};
-const sameEmailUser = {
-  name: 'F',
-  lastName: 'Perez',
-  email: 'freecandy@msn.net',
-  password: 'abc351515'
-};
-const invalidPasswordUser = {
-  name: 'M',
-  lastName: 'M',
-  email: 'mm@cgt.com',
-  password: '123'
-};
-const mentallyChallengedUser = {
-  email: 'yes'
-};
+const createUsers = () => User.create(loggedUser);
 
 describe('users POST', () => {
+  beforeEach(done => createUsers().then(() => done()));
   it('should create an user', done =>
     request(app)
       .post('/users')
@@ -102,6 +84,7 @@ describe('users POST', () => {
 });
 
 describe('admin users creation', () => {
+  beforeEach(done => createUsers().then(() => done()));
   it('should create an admin user', done =>
     request(app)
       .post('/admin/users')
