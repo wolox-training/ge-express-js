@@ -8,5 +8,5 @@ exports.init = app => {
   app.get('/albums', albumController.getAlbums);
   app.get('/albums/:id/photos', albumController.getAlbumPhotos);
   app.post('/users', [validateUserSignUpData], userController.signUp);
-  app.post('/users/session', [], userController.signIn);
+  app.post('/users/session', userController.signIn);
 };
