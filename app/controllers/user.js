@@ -1,13 +1,8 @@
 const logger = require('../logger'),
   { createUser, getUserByEmail } = require('../services/user'),
   { encrypt, compareEncryptedData } = require('../utils/encrypt'),
-  { defaultError, emailExistsError } = require('../errors'),
-  {
-    common: {
-      session: { secret }
-    }
-  } = require('../../config'),
-  jwt = require('jsonwebtoken');
+  { defaultError, emailExistsError, emailNotFoundError } = require('../errors'),
+  { getUserSessionToken } = require('../services/token');
 
 exports.signUp = (req, res, next) =>
   encrypt(req.body.password)
@@ -37,11 +32,11 @@ exports.signIn = (req, res, next) =>
   getUserByEmail(req.body.email, next)
     .then(user => {
       if (!user) {
-        return res.status(400).send(['Email not found']);
+        return next(emailNotFoundError('Email not found'));
       }
       return compareEncryptedData(req.body.password, user.password).then(isValid => {
         if (isValid) {
-          const token = jwt.sign({ userId: user.id }, secret);
+          const token = getUserSessionToken({ userId: user.id });
           return res.status(200).send(token);
         }
         return res.status(401).send('Unauthorized');
