@@ -4,5 +4,6 @@ exports.sampleAlbum = {
 };
 
 exports.notFoundResponse = {
-  statusCode: 404
+  statusCode: 404,
+  status: 404
 };

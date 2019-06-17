@@ -1,18 +1,28 @@
 const app = require('../../app'),
   request = require('supertest'),
   rpMock = require('request-promise'),
-  { user: User } = require('../../app/models'),
-  { loggedUser, authorizedUserToken } = require('../mocks/user'),
+  { user: User, userAlbum: UserAlbum } = require('../../app/models'),
+  {
+    loggedUser,
+    authorizedUserToken,
+    unauthorizedUserToken,
+
+    sampleUser2
+  } = require('../mocks/user'),
   { sampleAlbum, notFoundResponse } = require('../mocks/album');
 jest.mock('request-promise');
 
-const createUsers = () => User.create(loggedUser);
+const createUsers = () =>
+  Promise.all(
+    [User.create(loggedUser), User.create(sampleUser2)],
+    UserAlbum.create({ albumId: 1, userId: 2 })
+  );
 
 describe('album/:id POST (buy album)', () => {
   beforeEach(done => createUsers().then(() => done()));
-  rpMock.mockResolvedValueOnce(sampleAlbum);
-  it('should sell an album to an user', done =>
-    request(app)
+  it('should sell an album to an user', done => {
+    rpMock.mockResolvedValueOnce(sampleAlbum);
+    return request(app)
       .post('/albums/1')
       .query({ token: authorizedUserToken })
       .expect(200)
@@ -21,10 +31,11 @@ describe('album/:id POST (buy album)', () => {
           done(err);
         }
         done();
-      }));
-  rpMock.mockResolvedValueOnce(sampleAlbum);
-  it('should not sell the same album to the same user', done =>
-    request(app)
+      });
+  });
+  it('should not sell the same album to the same user', done => {
+    rpMock.mockResolvedValueOnce(sampleAlbum);
+    return request(app)
       .post('/albums/1')
       .query({ token: authorizedUserToken })
       .expect(200)
@@ -42,10 +53,11 @@ describe('album/:id POST (buy album)', () => {
             }
             done();
           });
-      }));
-  rpMock.mockResolvedValueOnce(sampleAlbum);
-  it('should authenticate the user', done =>
-    request(app)
+      });
+  });
+  it('should authenticate the user', done => {
+    rpMock.mockResolvedValueOnce(sampleAlbum);
+    return request(app)
       .post('/albums/1')
       .expect(401)
       .end(err => {
@@ -53,17 +65,71 @@ describe('album/:id POST (buy album)', () => {
           done(err);
         }
         done();
-      }));
-  rpMock.mockRejectedValue(notFoundResponse);
-  it('should return an error if the album doesnt exist', done =>
-    request(app)
+      });
+  });
+  it('should return an error if the album doesnt exist', done => {
+    rpMock.mockRejectedValue(notFoundResponse);
+    return request(app)
       .post('/albums/999')
       .query({ token: authorizedUserToken })
       .expect(404)
-      .end(err => {
+      .then(() => done());
+  });
+});
+
+describe('users/:id/albums GET', () => {
+  beforeEach(done => createUsers().then(() => done()));
+  it('should authenticate user', done =>
+    request(app)
+      .get('/users/1/albums')
+      .expect(401)
+      .then(() => done()));
+  it('should get an users albums', done => {
+    rpMock.mockResolvedValueOnce(sampleAlbum);
+    return request(app)
+      .get('/users/2/albums')
+      .query({ token: unauthorizedUserToken })
+      .expect(200)
+      .end((err, res) => {
         if (err) {
           done(err);
         }
+        expect(Array.isArray(res.body)).toBeTruthy();
+        expect(res.body[0]).toEqual(sampleAlbum);
+        done();
+      });
+  });
+  it('should not let you get albums from another user when logged user is not an admin', () =>
+    request(app)
+      .get('/users/1/albums')
+      .query({ token: unauthorizedUserToken })
+      .expect(401));
+  it('should let you get albums from another user when logged user is admin ', done => {
+    rpMock.mockResolvedValueOnce(sampleAlbum);
+    return request(app)
+      .get('/users/2/albums')
+      .query({ token: authorizedUserToken })
+      .expect(200)
+      .end((err, res) => {
+        if (err) {
+          done(err);
+        }
+        expect(Array.isArray(res.body)).toBeTruthy();
+        expect(res.body[0]).toEqual(sampleAlbum);
+        done();
+      });
+  });
+  it('should return an empty array when user has no albums', done =>
+    request(app)
+      .get('/users/1/albums')
+      .query({ token: authorizedUserToken })
+      .expect(200)
+      .end((err, res) => {
+        if (err) {
+          done(err);
+        }
+        expect(Array.isArray(res.body)).toBeTruthy();
+        expect(res.body).toEqual([]);
         done();
       }));
 });

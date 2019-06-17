@@ -114,7 +114,7 @@ describe('admin users creation', () => {
           })
         )
     ));
-  it('should not allow nonauthorized users to create admin users', done =>
+  xit('should not allow nonauthorized users to create admin users', done =>
     request(app)
       .post('/admin/users')
       .query({ token: unauthorizedUserToken })

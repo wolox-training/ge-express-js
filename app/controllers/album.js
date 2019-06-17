@@ -1,5 +1,5 @@
 const { getAlbums, getAlbumPhotos, getAlbum, sellAlbumToUser } = require('../services/album'),
-  { getUserAlbums } = require('../services/user'),
+  { getUserAlbumIds } = require('../services/user'),
   logger = require('../logger'),
   { apiError, defaultError, duplicateAlbumError, notFoundError } = require('../errors');
 
@@ -25,7 +25,7 @@ exports.buyAlbum = (req, res, next) =>
       if (!album) {
         return next(notFoundError('Album not found'));
       }
-      return getUserAlbums(req.user.id, next).then(albums => {
+      return getUserAlbumIds(req.user.id, next).then(albums => {
         if (albums && albums.some(userAlbum => userAlbum.albumId === parseInt(req.params.id))) {
           return next(duplicateAlbumError('User already has this album'));
         }

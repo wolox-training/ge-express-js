@@ -18,6 +18,13 @@ exports.sampleUser = {
   email: 'freecandy@msn.net',
   password: 'abc452626'
 };
+exports.sampleUser2 = {
+  name: 'santiago',
+  lastName: 'peta',
+  email: 'no@toque.eso',
+  password: 'peta2009',
+  admin: false
+};
 exports.sameEmailUser = {
   name: 'F',
   lastName: 'Perez',
