@@ -2,10 +2,13 @@ const { user: User } = require('../models'),
   { databaseError } = require('../errors'),
   { DEFAULT_PAGE_LIMIT } = require('../constants'),
   { userAlbum: UserAlbum } = require('../models'),
-  request = require('../utils/request');
+  request = require('../utils/request'),
+  { generateHash } = require('random-hash');
 
 exports.createUser = ({ email, ...otherUserData }, next) =>
-  User.findOrCreate({ where: { email }, defaults: otherUserData }).catch(err => next(databaseError(err)));
+  User.findOrCreate({ where: { email }, defaults: { ...otherUserData, secret: generateHash() } }).catch(err =>
+    next(databaseError(err))
+  );
 
 exports.getUserByEmail = (email, next) =>
   User.findOne({ where: { email } }).catch(err => next(databaseError(err)));
@@ -34,3 +37,5 @@ exports.getUserAlbums = id =>
   exports
     .getUserAlbumIds(id)
     .then(ids => Promise.all(ids.map(albumId => request(`albums/${albumId.albumId}`))));
+
+exports.generateNewUserSecret = id => User.update({ secret: generateHash() }, { where: { id } });
