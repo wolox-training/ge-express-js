@@ -1,6 +1,7 @@
 const { validateUserData } = require('../validations/user'),
   { authenticationError, invalidUserError } = require('../errors'),
-  { verifyToken } = require('../services/token');
+  jwt = require('jsonwebtoken'),
+  { secret } = require('../../config').common.session;
 
 exports.validateUserSignUpData = (req, res, next) => {
   const validationErrors = validateUserData(req.body);
@@ -12,8 +13,8 @@ exports.validateUserSignUpData = (req, res, next) => {
 
 exports.authenticate = (req, res, next) => {
   const { token } = req.query;
-  verifyToken(token, (err, payload) => {
-    if (payload && payload.admin) {
+  jwt.verify(token, secret, (err, payload) => {
+    if (payload && payload.userId) {
       next();
     } else {
       next(authenticationError('Unauthorized'));
