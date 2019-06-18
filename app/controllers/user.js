@@ -7,6 +7,7 @@ const logger = require('../logger'),
     getUserAlbums,
     generateNewUserSecret
   } = require('../services/user'),
+  { getConfigValue } = require('../services/config'),
   { encrypt, compareEncryptedData } = require('../utils/encrypt'),
   { defaultError, emailExistsError, authenticationError } = require('../errors'),
   {
@@ -14,7 +15,8 @@ const logger = require('../logger'),
       session: { secret }
     }
   } = require('../../config'),
-  jwt = require('jsonwebtoken');
+  jwt = require('jsonwebtoken'),
+  { SESSION_EXPIRE_TIME_KEY } = require('../constants');
 
 exports.signUp = (req, res, next) =>
   encrypt(req.body.password)
@@ -36,13 +38,23 @@ exports.signIn = (req, res, next) =>
       if (!user) {
         return res.status(400).send(['Email not found']);
       }
-      return compareEncryptedData(req.body.password, user.password).then(isValid => {
-        if (isValid) {
-          const token = jwt.sign({ userId: user.id, admin: user.admin, secret: user.secret }, secret);
-          return res.status(200).send(token);
-        }
-        return res.status(401).send('Unauthorized');
-      });
+      return compareEncryptedData(req.body.password, user.password).then(isValid =>
+        getConfigValue(SESSION_EXPIRE_TIME_KEY).then(expireTime => {
+          if (isValid) {
+            const token = jwt.sign(
+              {
+                userId: user.id,
+                admin: user.admin,
+                secret: user.secret,
+                expires: Date.now() + parseInt(expireTime.value)
+              },
+              secret
+            );
+            return res.status(200).send(token);
+          }
+          return res.status(401).send('Unauthorized');
+        })
+      );
     })
     .catch(err => {
       logger.error(`Error signin in: ${err}`);

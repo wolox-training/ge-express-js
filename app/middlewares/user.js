@@ -21,7 +21,7 @@ exports.authenticate = (req, res, next) => {
   jwt.verify(token, secret, (err, payload) => {
     if (payload && payload.userId) {
       return getUser(payload.userId).then(user => {
-        if (!user || payload.secret !== user.secret) {
+        if (!user || payload.secret !== user.secret || payload.expires < Date.now()) {
           return next(authenticationError('Unauthorized'));
         }
         req.user = user.dataValues;
