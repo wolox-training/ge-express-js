@@ -11,12 +11,22 @@ exports.getAlbums = (req, res) =>
       return apiError(err.message);
     });
 
-exports.getAlbumPhotos = (req, res) =>
-  getAlbumPhotos(req.params.id)
-    .then(response => res.status(200).send(response))
+exports.getAlbumPhotos = (req, res, next) =>
+  getAlbum(req.params.id)
+    .then(album => {
+      if (!album) {
+        return next(notFoundError('Album not found'));
+      }
+      return getUserAlbumIds(req.user.id, next).then(albums => {
+        if (!albums || !albums.some(userAlbum => userAlbum.albumId === parseInt(req.params.id))) {
+          return next(notFoundError("User doesn't have this album"));
+        }
+        return getAlbumPhotos(req.params.id).then(response => res.send(response));
+      });
+    })
     .catch(err => {
       logger.error(`Error getting album photos: ${err}`);
-      return apiError(err.message);
+      return next(defaultError(err));
     });
 
 exports.buyAlbum = (req, res, next) =>
