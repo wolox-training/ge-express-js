@@ -3,7 +3,8 @@ const request = require('request-promise'),
     common: {
       externalApi: { apiBaseUrl }
     }
-  } = require('../../config');
+  } = require('../../config'),
+  { apiError } = '../error';
 
 const buildDefaultApiConfig = path => ({
   uri: `${apiBaseUrl}/${path}`,
@@ -11,6 +12,7 @@ const buildDefaultApiConfig = path => ({
   headers: { 'content-type': 'application/json' }
 });
 
-exports.getAlbums = () => request(buildDefaultApiConfig('albums'));
+exports.getAlbums = () => request(buildDefaultApiConfig('albums')).catch(err => apiError(err));
 
-exports.getAlbumPhotos = id => request(buildDefaultApiConfig(`albums/${id}/photos`));
+exports.getAlbumPhotos = id =>
+  request(buildDefaultApiConfig(`albums/${id}/photos`)).catch(err => apiError(err));
