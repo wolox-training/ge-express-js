@@ -11,4 +11,5 @@ exports.init = app => {
   app.post('/users/session', userController.signIn);
   app.get('/users', [authenticate], userController.getUsers);
   app.post('/admin/users', [authenticate], userController.createAdminUser);
+  app.post('/users/session', userController.signIn);
 };

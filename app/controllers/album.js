@@ -1,19 +1,18 @@
 const { getAlbums, getAlbumPhotos } = require('../services/album'),
-  logger = require('../logger'),
-  { apiError } = require('../errors');
+  logger = require('../logger');
 
-exports.getAlbums = (req, res) =>
+exports.getAlbums = (req, res, next) =>
   getAlbums()
-    .then(response => res.status(200).send(response))
+    .then(response => res.send(response))
     .catch(err => {
       logger.error(`Error getting albums: ${err.message}`);
-      return apiError(err.message);
+      return next(err);
     });
 
-exports.getAlbumPhotos = (req, res) =>
+exports.getAlbumPhotos = (req, res, next) =>
   getAlbumPhotos(req.params.id)
-    .then(response => res.status(200).send(response))
+    .then(response => res.send(response))
     .catch(err => {
       logger.error(`Error getting album photos: ${err}`);
-      return apiError(err.message);
+      return next(err);
     });
