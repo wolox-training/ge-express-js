@@ -31,7 +31,8 @@ const config = {
       host: process.env.DB_HOST,
       port: process.env.DB_PORT,
       username: process.env.DB_USERNAME,
-      password: process.env.DB_PASSWORD
+      password: process.env.DB_PASSWORD,
+      url: process.env.DATABASE_URL
     },
     api: {
       bodySizeLimit: process.env.API_BODY_SIZE_LIMIT,

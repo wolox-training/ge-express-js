@@ -4,10 +4,11 @@ const fs = require('fs'),
   basename = path.basename(__filename),
   config = require('../../config'),
   dbConfig = require('../../config/db')[config.environment],
+  databaseUrl = config.common.database.url,
   db = {};
 
-const sequelize = process.env.DATABASE_URL
-  ? new Sequelize(process.env.DATABASE_URL)
+const sequelize = databaseUrl
+  ? new Sequelize(databaseUrl)
   : new Sequelize(dbConfig.database, dbConfig.username, dbConfig.password, dbConfig);
 
 fs.readdirSync(__dirname)
