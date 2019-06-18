@@ -1,22 +1,22 @@
 const { getAlbums, getAlbumPhotos, getAlbum, sellAlbumToUser } = require('../services/album'),
   { getUserAlbums } = require('../services/user'),
   logger = require('../logger'),
-  { apiError, defaultError, duplicateAlbumError, notFoundError } = require('../errors');
+  { duplicateAlbumError, notFoundError } = require('../errors');
 
-exports.getAlbums = (req, res) =>
+exports.getAlbums = (req, res, next) =>
   getAlbums()
-    .then(response => res.status(200).send(response))
+    .then(response => res.send(response))
     .catch(err => {
       logger.error(`Error getting albums: ${err.message}`);
-      return apiError(err.message);
+      return next(err);
     });
 
-exports.getAlbumPhotos = (req, res) =>
+exports.getAlbumPhotos = (req, res, next) =>
   getAlbumPhotos(req.params.id)
-    .then(response => res.status(200).send(response))
+    .then(response => res.send(response))
     .catch(err => {
       logger.error(`Error getting album photos: ${err}`);
-      return apiError(err.message);
+      return next(err);
     });
 
 exports.buyAlbum = (req, res, next) =>
@@ -29,10 +29,10 @@ exports.buyAlbum = (req, res, next) =>
         if (albums && albums.some(userAlbum => userAlbum.albumId === parseInt(req.params.id))) {
           return next(duplicateAlbumError('User already has this album'));
         }
-        return sellAlbumToUser(req.params.id, req.user, next).then(() => res.status(200).send());
+        return sellAlbumToUser(req.params.id, req.user).then(() => res.send());
       });
     })
     .catch(err => {
       logger.error(`Error buying album: ${err}`);
-      return next(defaultError(err));
+      return next(err);
     });

@@ -1,20 +1,31 @@
 const { user: User } = require('../models'),
   { databaseError } = require('../errors'),
   { DEFAULT_PAGE_LIMIT } = require('../constants'),
-  { userAlbum: UserAlbum } = require('../models');
+  { userAlbum: UserAlbum } = require('../models'),
+  logger = require('../logger');
 
-exports.createUser = ({ email, ...otherUserData }, next) =>
-  User.findOrCreate({ where: { email }, defaults: otherUserData }).catch(err => next(databaseError(err)));
+exports.createUser = ({ email, ...otherUserData }) =>
+  User.findOrCreate({ where: { email }, defaults: otherUserData }).catch(err => {
+    logger.error(err);
+    return databaseError(err);
+  });
 
-exports.getUserByEmail = (email, next) =>
-  User.findOne({ where: { email } }).catch(err => next(databaseError(err)));
+exports.getUserByEmail = email =>
+  User.findOne({ where: { email } }).catch(err => {
+    logger.error(err);
+    return databaseError(err);
+  });
 
-exports.getUsers = ({ page }, next) =>
-  User.findAll({ limit: DEFAULT_PAGE_LIMIT, offset: page ? (page - 1) * DEFAULT_PAGE_LIMIT : 0 }).catch(err =>
-    next(databaseError(err))
-  );
+exports.getUsers = ({ page }) =>
+  User.findAll({
+    limit: DEFAULT_PAGE_LIMIT,
+    offset: page ? (parseInt(page) - 1) * DEFAULT_PAGE_LIMIT : 0
+  }).catch(err => {
+    logger.error(err);
+    return databaseError(err);
+  });
 
-exports.createOrUpdateToAdminUser = ({ email, ...otherUserData }, next) =>
+exports.createOrUpdateToAdminUser = ({ email, ...otherUserData }) =>
   User.findOrCreate({ where: { email }, defaults: { ...otherUserData, admin: true } })
     .then(([user, created]) => {
       if (!created && !user.admin) {
@@ -22,9 +33,18 @@ exports.createOrUpdateToAdminUser = ({ email, ...otherUserData }, next) =>
       }
       return user;
     })
-    .catch(err => next(databaseError(err)));
+    .catch(err => {
+      logger.error(err);
+      return databaseError(err);
+    });
 
 exports.getUser = id => User.findOne({ where: { id } });
 
 exports.getUserAlbums = id =>
   User.findOne({ where: { id }, include: [{ model: UserAlbum }] }).then(user => user.userAlbums);
+
+exports.getUserByEmail = email =>
+  User.findOne({ where: { email } }).catch(err => {
+    logger.error(err);
+    return databaseError(err);
+  });

@@ -1,1 +1,2 @@
 exports.DEFAULT_SALT_ROUNDS = 10;
+exports.DEFAULT_PAGE_LIMIT = 50;
