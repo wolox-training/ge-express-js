@@ -3,13 +3,16 @@ const { user: User } = require('../models'),
   { DEFAULT_PAGE_LIMIT } = require('../constants'),
   { userAlbum: UserAlbum } = require('../models'),
   request = require('../utils/request'),
+  { generateHash } = require('random-hash'),
   logger = require('../logger');
 
 exports.createUser = ({ email, ...otherUserData }) =>
-  User.findOrCreate({ where: { email }, defaults: otherUserData }).catch(err => {
-    logger.error(err);
-    return databaseError(err);
-  });
+  User.findOrCreate({ where: { email }, defaults: { ...otherUserData, secret: generateHash() } }).catch(
+    err => {
+      logger.error(err);
+      return databaseError(err);
+    }
+  );
 
 exports.getUserByEmail = email =>
   User.findOne({ where: { email } }).catch(err => {
@@ -49,8 +52,4 @@ exports.getUserAlbums = id =>
     .getUserAlbumIds(id)
     .then(ids => Promise.all(ids.map(albumId => request(`albums/${albumId.albumId}`))));
 
-exports.getUserByEmail = email =>
-  User.findOne({ where: { email } }).catch(err => {
-    logger.error(err);
-    return databaseError(err);
-  });
+exports.generateNewUserSecret = id => User.update({ secret: generateHash() }, { where: { id } });

@@ -4,7 +4,8 @@ const logger = require('../logger'),
     getUserByEmail,
     getUsers,
     createOrUpdateToAdminUser,
-    getUserAlbums
+    getUserAlbums,
+    generateNewUserSecret
   } = require('../services/user'),
   { encrypt, compareEncryptedData } = require('../utils/encrypt'),
   { emailExistsError, emailNotFoundError, authenticationError } = require('../errors'),
@@ -39,7 +40,7 @@ exports.signIn = (req, res, next) =>
       }
       return compareEncryptedData(req.body.password, user.password).then(isValid => {
         if (isValid) {
-          const token = getUserSessionToken({ userId: user.id, admin: user.admin });
+          const token = getUserSessionToken({ userId: user.id, admin: user.admin, secret: user.secret });
           return res.send(token);
         }
         return next(authenticationError('Unauthorized'));
@@ -81,3 +82,11 @@ exports.getUserAlbums = (req, res, next) => {
     .then(albums => res.send(albums))
     .catch(next);
 };
+
+exports.invalidateSession = (req, res, next) =>
+  generateNewUserSecret(req.user.id)
+    .then(() => res.send())
+    .catch(err => {
+      logger.error(`Error invalidating session: ${err}`);
+      return next(err);
+    });
