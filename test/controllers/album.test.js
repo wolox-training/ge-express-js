@@ -7,10 +7,11 @@ const app = require('../../app'),
 jest.mock('request-promise');
 
 const createUsers = () =>
-  Promise.all(
-    [User.create(loggedUser), User.create(sampleUser2)],
+  Promise.all([
+    User.create(loggedUser),
+    User.create(sampleUser2),
     UserAlbum.create({ albumId: 1, userId: 2 })
-  );
+  ]);
 
 describe('album/:id POST (buy album)', () => {
   beforeEach(done => createUsers().then(() => done()));
