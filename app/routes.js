@@ -9,7 +9,7 @@ exports.init = app => {
   app.get('/albums/:id/photos', albumController.getAlbumPhotos);
   app.post('/users', [validateUserSignUpData], userController.signUp);
   app.post('/users/session', userController.signIn);
-  app.get('/users', [authenticate], userController.getUsers);
+  app.get('/users', [authenticate, authenticateAdmin], userController.getUsers);
   app.post('/admin/users', [authenticate, authenticateAdmin], userController.createAdminUser);
-  app.post('/users/session', userController.signIn);
+  app.post('/albums/:id', [authenticate], albumController.buyAlbum);
 };

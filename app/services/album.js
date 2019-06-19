@@ -1,18 +1,24 @@
-const request = require('request-promise'),
-  {
-    common: {
-      externalApi: { apiBaseUrl }
+const { databaseError, apiError } = require('../errors'),
+  { userAlbum: UserAlbum } = require('../models'),
+  logger = require('../logger'),
+  request = require('../utils/request');
+
+exports.getAlbums = () => request('albums');
+
+exports.getAlbumPhotos = id => request(`albums/${id}/photos`);
+
+exports.getAlbum = id =>
+  request(`albums/${id}`).catch(err => {
+    if (err.statusCode === 404) {
+      return null;
     }
-  } = require('../../config'),
-  { apiError } = '../error';
+    logger.error(err);
+    return apiError(err);
+  });
 
-const buildDefaultApiConfig = path => ({
-  uri: `${apiBaseUrl}/${path}`,
-  json: true,
-  headers: { 'content-type': 'application/json' }
-});
+exports.sellAlbumToUser = (albumId, user) =>
+  UserAlbum.create({ albumId, userId: user.id }).catch(err => databaseError(err));
 
-exports.getAlbums = () => request(buildDefaultApiConfig('albums')).catch(err => apiError(err));
+exports.getAlbums = () => request('albums').catch(err => apiError(err));
 
-exports.getAlbumPhotos = id =>
-  request(buildDefaultApiConfig(`albums/${id}/photos`)).catch(err => apiError(err));
+exports.getAlbumPhotos = id => request(`albums/${id}/photos`).catch(err => apiError(err));

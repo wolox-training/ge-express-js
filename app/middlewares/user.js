@@ -1,7 +1,12 @@
 const { validateUserData } = require('../validations/user'),
   { authenticationError, invalidUserError } = require('../errors'),
   jwt = require('jsonwebtoken'),
-  { secret } = require('../../config').common.session;
+  {
+    common: {
+      session: { secret }
+    }
+  } = require('../../config'),
+  { getUser } = require('../services/user');
 
 exports.validateUserSignUpData = (req, res, next) => {
   const validationErrors = validateUserData(req.body);
@@ -15,11 +20,15 @@ exports.authenticate = (req, res, next) => {
   const { token } = req.query;
   jwt.verify(token, secret, (err, payload) => {
     if (payload && payload.userId) {
-      req.user = payload;
-      next();
-    } else {
-      next(authenticationError('Unauthorized'));
+      return getUser(payload.userId).then(user => {
+        if (!user) {
+          return next(authenticationError('Unauthorized'));
+        }
+        req.user = user.dataValues;
+        return next();
+      });
     }
+    return next(authenticationError('Unauthorized'));
   });
 };
 
