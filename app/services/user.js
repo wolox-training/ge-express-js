@@ -2,6 +2,7 @@ const { user: User } = require('../models'),
   { databaseError } = require('../errors'),
   { DEFAULT_PAGE_LIMIT } = require('../constants'),
   { userAlbum: UserAlbum } = require('../models'),
+  request = require('../utils/request'),
   logger = require('../logger');
 
 exports.createUser = ({ email, ...otherUserData }) =>
@@ -40,8 +41,13 @@ exports.createOrUpdateToAdminUser = ({ email, ...otherUserData }) =>
 
 exports.getUser = id => User.findOne({ where: { id } });
 
-exports.getUserAlbums = id =>
+exports.getUserAlbumIds = id =>
   User.findOne({ where: { id }, include: [{ model: UserAlbum }] }).then(user => user.userAlbums);
+
+exports.getUserAlbums = id =>
+  exports
+    .getUserAlbumIds(id)
+    .then(ids => Promise.all(ids.map(albumId => request(`albums/${albumId.albumId}`))));
 
 exports.getUserByEmail = email =>
   User.findOne({ where: { email } }).catch(err => {

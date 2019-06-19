@@ -1,5 +1,11 @@
 const logger = require('../logger'),
-  { createUser, getUserByEmail, getUsers, createOrUpdateToAdminUser } = require('../services/user'),
+  {
+    createUser,
+    getUserByEmail,
+    getUsers,
+    createOrUpdateToAdminUser,
+    getUserAlbums
+  } = require('../services/user'),
   { encrypt, compareEncryptedData } = require('../utils/encrypt'),
   { emailExistsError, emailNotFoundError, authenticationError } = require('../errors'),
   { getUserSessionToken } = require('../services/token');
@@ -66,3 +72,12 @@ exports.createAdminUser = (req, res, next) =>
         next(err);
       })
   );
+
+exports.getUserAlbums = (req, res, next) => {
+  if (req.user.id !== parseInt(req.params.id) && !req.user.admin) {
+    return next(authenticationError('Unauthorized'));
+  }
+  return getUserAlbums(req.params.id)
+    .then(albums => res.send(albums))
+    .catch(next);
+};

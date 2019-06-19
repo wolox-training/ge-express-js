@@ -11,7 +11,8 @@ const statusCodes = {
   [errors.EMAIL_EXISTS_ERROR]: 409,
   [errors.INVALID_USER_ERROR]: 400,
   [errors.DUPLICATE_ALBUM_ERROR]: 400,
-  [errors.NOT_FOUND]: 404
+  [errors.NOT_FOUND]: 404,
+  [errors.EMAIL_NOT_FOUND]: 401
 };
 
 exports.handle = (error, req, res, next) => {
