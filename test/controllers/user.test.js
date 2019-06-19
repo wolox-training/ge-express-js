@@ -9,8 +9,8 @@ const app = require('../../app'),
     }
   } = require('../../config');
 
-const authorizedUserToken = jwt.sign({ admin: true }, secret);
-const unauthorizedUserToken = jwt.sign({ admin: false }, secret);
+const authorizedUserToken = jwt.sign({ admin: true, userId: 1 }, secret);
+const unauthorizedUserToken = jwt.sign({ admin: false, userId: 2 }, secret);
 const sampleUser = {
   name: 'nicolas',
   lastName: 'L',
