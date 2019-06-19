@@ -7,8 +7,10 @@ const logger = require('../logger'),
     getUserAlbums,
     generateNewUserSecret
   } = require('../services/user'),
+  { getConfigValue } = require('../services/config'),
   { encrypt, compareEncryptedData } = require('../utils/encrypt'),
-  { emailExistsError, emailNotFoundError, authenticationError } = require('../errors'),
+  { emailExistsError, authenticationError, emailNotFoundError } = require('../errors'),
+  { SESSION_EXPIRE_TIME_KEY } = require('../constants'),
   { getUserSessionToken } = require('../services/token');
 
 exports.signUp = (req, res, next) =>
@@ -38,13 +40,20 @@ exports.signIn = (req, res, next) =>
       if (!user) {
         return next(emailNotFoundError('Email not found'));
       }
-      return compareEncryptedData(req.body.password, user.password).then(isValid => {
-        if (isValid) {
-          const token = getUserSessionToken({ userId: user.id, admin: user.admin, secret: user.secret });
-          return res.send(token);
-        }
-        return next(authenticationError('Unauthorized'));
-      });
+      return compareEncryptedData(req.body.password, user.password).then(isValid =>
+        getConfigValue(SESSION_EXPIRE_TIME_KEY).then(expireTime => {
+          if (isValid) {
+            const token = getUserSessionToken({
+              userId: user.id,
+              admin: user.admin,
+              secret: user.secret,
+              expires: Date.now() + parseInt(expireTime.value)
+            });
+            return res.send(token);
+          }
+          return next(authenticationError('Unauthorized'));
+        })
+      );
     })
     .catch(err => {
       logger.error(err);

@@ -92,11 +92,17 @@ describe('users/:id/albums GET', () => {
         done();
       });
   });
-  it('should not let you get albums from another user when logged user is not an admin', () =>
+  it('should not let you get albums from another user when logged user is not an admin', done =>
     request(app)
       .get('/users/1/albums')
       .query({ token: unauthorizedUserToken })
-      .expect(401));
+      .expect(401)
+      .end(err => {
+        if (err) {
+          done(err);
+        }
+        done();
+      }));
   it('should let you get albums from another user when logged user is admin ', done => {
     rpMock.mockResolvedValueOnce(sampleAlbum);
     return request(app)

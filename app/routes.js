@@ -1,6 +1,7 @@
 const { healthCheck } = require('./controllers/healthCheck'),
   albumController = require('./controllers/album'),
   userController = require('./controllers/user'),
+  configController = require('./controllers/config'),
   { validateUserSignUpData, authenticate, authenticateAdmin } = require('./middlewares/user');
 
 exports.init = app => {
@@ -14,4 +15,9 @@ exports.init = app => {
   app.post('/albums/:id', [authenticate], albumController.buyAlbum);
   app.get('/users/:id/albums', [authenticate], userController.getUserAlbums);
   app.post('/users/sessions/invalidate_all', [authenticate], userController.invalidateSession);
+  app.post(
+    '/admin/set_session_expire_time',
+    [authenticate, authenticateAdmin],
+    configController.setExpireTime
+  );
 };
