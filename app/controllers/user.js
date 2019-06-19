@@ -9,18 +9,20 @@ const logger = require('../logger'),
   } = require('../services/user'),
   { getConfigValue } = require('../services/config'),
   { encrypt, compareEncryptedData } = require('../utils/encrypt'),
-  { defaultError, emailExistsError, authenticationError } = require('../errors'),
-  {
-    common: {
-      session: { secret }
-    }
-  } = require('../../config'),
-  jwt = require('jsonwebtoken'),
-  { SESSION_EXPIRE_TIME_KEY } = require('../constants');
+  { emailExistsError, authenticationError, emailNotFoundError } = require('../errors'),
+  { SESSION_EXPIRE_TIME_KEY } = require('../constants'),
+  { getUserSessionToken } = require('../services/token');
 
 exports.signUp = (req, res, next) =>
   encrypt(req.body.password)
-    .then(encryptedPassword => createUser({ ...req.body, password: encryptedPassword }, next))
+    .then(encryptedPassword =>
+      createUser({
+        name: req.body.name,
+        lastName: req.body.lastName,
+        email: req.body.email,
+        password: encryptedPassword
+      })
+    )
     .then(([user, created]) => {
       if (created) {
         return res.status(201).send(user);
@@ -28,62 +30,56 @@ exports.signUp = (req, res, next) =>
       return next(emailExistsError('Email already in use'));
     })
     .catch(err => {
-      logger.error(`Error creating user: ${err}`);
-      return next(defaultError(err));
+      logger.error(err);
+      return next(err);
     });
 
 exports.signIn = (req, res, next) =>
-  getUserByEmail(req.body.email, next)
+  getUserByEmail(req.body.email)
     .then(user => {
       if (!user) {
-        return res.status(400).send(['Email not found']);
+        return next(emailNotFoundError('Email not found'));
       }
       return compareEncryptedData(req.body.password, user.password).then(isValid =>
         getConfigValue(SESSION_EXPIRE_TIME_KEY).then(expireTime => {
           if (isValid) {
-            const token = jwt.sign(
-              {
-                userId: user.id,
-                admin: user.admin,
-                secret: user.secret,
-                expires: Date.now() + parseInt(expireTime.value)
-              },
-              secret
-            );
-            return res.status(200).send(token);
+            const token = getUserSessionToken({
+              userId: user.id,
+              admin: user.admin,
+              secret: user.secret,
+              expires: Date.now() + parseInt(expireTime.value)
+            });
+            return res.send(token);
           }
-          return res.status(401).send('Unauthorized');
+          return next(authenticationError('Unauthorized'));
         })
       );
     })
     .catch(err => {
-      logger.error(`Error signin in: ${err}`);
-      return next(defaultError(err));
+      logger.error(err);
+      return next(err);
     });
 
 exports.getUsers = (req, res, next) =>
-  getUsers({ page: req.body.page }, next)
-    .then(users => res.status(200).send(users))
+  getUsers({ page: req.query.page })
+    .then(users => res.send(users))
     .catch(err => {
-      logger.error(`Error getting users: ${err}`);
-      return next(defaultError(err));
+      logger.error(err);
+      return next(err);
     });
 
 exports.createAdminUser = (req, res, next) =>
   encrypt(req.body.password).then(encryptedPassword =>
-    createOrUpdateToAdminUser(
-      {
-        name: req.body.name,
-        lastName: req.body.lastName,
-        email: req.body.email,
-        password: encryptedPassword
-      },
-      next
-    )
-      .then(() => res.status(200).send())
+    createOrUpdateToAdminUser({
+      name: req.body.name,
+      lastName: req.body.lastName,
+      email: req.body.email,
+      password: encryptedPassword
+    })
+      .then(() => res.send())
       .catch(err => {
         logger.error(`Error creating admin user: ${err}`);
-        next();
+        next(err);
       })
   );
 

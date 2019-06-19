@@ -1,11 +1,11 @@
-const { validateUserData } = require('../utils/user'),
+const { validateUserData } = require('../validations/user'),
+  { authenticationError, invalidUserError } = require('../errors'),
   jwt = require('jsonwebtoken'),
   {
     common: {
       session: { secret }
     }
   } = require('../../config'),
-  { authenticationError, invalidUserError } = require('../errors'),
   { getUser } = require('../services/user');
 
 exports.validateUserSignUpData = (req, res, next) => {
