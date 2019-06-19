@@ -12,4 +12,5 @@ exports.init = app => {
   app.get('/users', [authenticate, authenticateAdmin], userController.getUsers);
   app.post('/admin/users', [authenticate, authenticateAdmin], userController.createAdminUser);
   app.post('/albums/:id', [authenticate], albumController.buyAlbum);
+  app.post('/users/session', userController.signIn);
 };
