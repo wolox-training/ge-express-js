@@ -34,3 +34,6 @@ exports.duplicateAlbumError = message => internalError(message, exports.DUPLICAT
 
 exports.NOT_FOUND = 'not_found';
 exports.notFoundError = message => internalError(message, exports.NOT_FOUND);
+
+exports.EMAIL_NOT_FOUND = 'email_not_found';
+exports.emailNotFoundError = message => internalError(message, exports.EMAIL_NOT_FOUND);
