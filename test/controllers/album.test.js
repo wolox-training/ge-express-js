@@ -2,13 +2,7 @@ const app = require('../../app'),
   request = require('supertest'),
   rpMock = require('request-promise'),
   { user: User, userAlbum: UserAlbum } = require('../../app/models'),
-  {
-    loggedUser,
-    authorizedUserToken,
-    unauthorizedUserToken,
-
-    sampleUser2
-  } = require('../mocks/user'),
+  { loggedUser, authorizedUserToken, unauthorizedUserToken, sampleUser2 } = require('../mocks/user'),
   { sampleAlbum, notFoundResponse } = require('../mocks/album');
 jest.mock('request-promise');
 
@@ -34,7 +28,7 @@ describe('album/:id POST (buy album)', () => {
       });
   });
   it('should not sell the same album to the same user', done => {
-    rpMock.mockResolvedValueOnce(sampleAlbum);
+    rpMock.mockResolvedValueOnce(sampleAlbum).mockResolvedValueOnce(sampleAlbum);
     return request(app)
       .post('/albums/1')
       .query({ token: authorizedUserToken })
@@ -55,9 +49,8 @@ describe('album/:id POST (buy album)', () => {
           });
       });
   });
-  it('should authenticate the user', done => {
-    rpMock.mockResolvedValueOnce(sampleAlbum);
-    return request(app)
+  it('should authenticate the user', done =>
+    request(app)
       .post('/albums/1')
       .expect(401)
       .end(err => {
@@ -65,8 +58,7 @@ describe('album/:id POST (buy album)', () => {
           done(err);
         }
         done();
-      });
-  });
+      }));
   it('should return an error if the album doesnt exist', done => {
     rpMock.mockRejectedValue(notFoundResponse);
     return request(app)
