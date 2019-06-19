@@ -23,8 +23,7 @@ module.exports = (sequelize, DataTypes) => {
       defaultValue: false
     },
     secret: {
-      type: DataTypes.STRING,
-      allowNull: false
+      type: DataTypes.STRING
     }
   });
   User.associate = models => {

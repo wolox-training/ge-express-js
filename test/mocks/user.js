@@ -41,5 +41,11 @@ exports.mentallyChallengedUser = {
   email: 'yes'
 };
 
-exports.authorizedUserToken = jwt.sign({ ...exports.loggedUser, admin: true, userId: 1 }, secret);
-exports.unauthorizedUserToken = jwt.sign({ ...exports.sampleUser, admin: false, userId: 2 }, secret);
+exports.authorizedUserToken = jwt.sign(
+  { ...exports.loggedUser, admin: true, userId: 1, expires: Date.now() + 600000, secret: 'abc123' },
+  secret
+);
+exports.unauthorizedUserToken = jwt.sign(
+  { ...exports.sampleUser, admin: false, userId: 2, expires: Date.now() + 600000, secret: 'abc123' },
+  secret
+);

@@ -7,14 +7,18 @@ exports.getAlbums = () => request('albums');
 
 exports.getAlbumPhotos = id => request(`albums/${id}/photos`);
 
-exports.getAlbum = (id, next) =>
+exports.getAlbum = id =>
   request(`albums/${id}`).catch(err => {
     if (err.statusCode === 404) {
       return null;
     }
     logger.error(err);
-    return next(apiError(err));
+    return apiError(err);
   });
 
-exports.sellAlbumToUser = (albumId, user, next) =>
-  UserAlbum.create({ albumId, userId: user.id }).catch(err => next(databaseError(err)));
+exports.sellAlbumToUser = (albumId, user) =>
+  UserAlbum.create({ albumId, userId: user.id }).catch(err => databaseError(err));
+
+exports.getAlbums = () => request('albums').catch(err => apiError(err));
+
+exports.getAlbumPhotos = id => request(`albums/${id}/photos`).catch(err => apiError(err));
