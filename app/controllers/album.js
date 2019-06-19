@@ -25,7 +25,7 @@ exports.buyAlbum = (req, res, next) =>
       if (!album) {
         return next(notFoundError('Album not found'));
       }
-      return getUserAlbums(req.user.id, next).then(albums => {
+      return getUserAlbums(req.user.id).then(albums => {
         if (albums && albums.some(userAlbum => userAlbum.albumId === parseInt(req.params.id))) {
           return next(duplicateAlbumError('User already has this album'));
         }
