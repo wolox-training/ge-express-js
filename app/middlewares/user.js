@@ -15,9 +15,17 @@ exports.authenticate = (req, res, next) => {
   const { token } = req.query;
   jwt.verify(token, secret, (err, payload) => {
     if (payload && payload.userId) {
+      req.user = payload;
       next();
     } else {
       next(authenticationError('Unauthorized'));
     }
   });
+};
+
+exports.authenticateAdmin = (req, res, next) => {
+  if (req.user && req.user.admin) {
+    return next();
+  }
+  return next(authenticationError('Unauthorized'));
 };
