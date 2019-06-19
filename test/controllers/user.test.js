@@ -130,3 +130,29 @@ describe('admin users creation', () => {
         });
       }));
 });
+
+describe('sessions', () => {
+  beforeEach(done => createUsers().then(() => done()));
+  it('should invalidate current active session', done =>
+    request(app)
+      .post('/users/sessions/invalidate_all')
+      .query({ token: authorizedUserToken })
+      .send()
+      .expect(200)
+      .end(err => {
+        if (err) {
+          return done(err);
+        }
+        return request(app)
+          .post('/users/sessions/invalidate_all')
+          .query({ token: authorizedUserToken })
+          .send()
+          .expect(401)
+          .end(err2 => {
+            if (err2) {
+              return done(err2);
+            }
+            return done();
+          });
+      }));
+});
