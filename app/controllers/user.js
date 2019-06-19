@@ -9,7 +9,7 @@ const logger = require('../logger'),
   } = require('../services/user'),
   { getConfigValue } = require('../services/config'),
   { encrypt, compareEncryptedData } = require('../utils/encrypt'),
-  { emailNotFoundError, emailExistsError, authenticationError } = require('../errors'),
+  { emailExistsError, authenticationError, emailNotFoundError } = require('../errors'),
   { SESSION_EXPIRE_TIME_KEY } = require('../constants'),
   { getUserSessionToken } = require('../services/token');
 

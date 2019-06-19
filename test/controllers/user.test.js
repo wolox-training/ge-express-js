@@ -155,4 +155,15 @@ describe('sessions', () => {
             return done();
           });
       }));
+  it('should not let an expired session access', done =>
+    request(app)
+      .post('/users/sessions/invalidate_all')
+      .send()
+      .expect(401)
+      .end(err => {
+        if (err) {
+          return done(err);
+        }
+        return done();
+      }));
 });

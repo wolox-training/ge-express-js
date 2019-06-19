@@ -42,10 +42,15 @@ exports.mentallyChallengedUser = {
 };
 
 exports.authorizedUserToken = jwt.sign(
-  { ...exports.loggedUser, admin: true, userId: 1, expires: Date.now() + 600000, secret: 'abc123' },
+  { ...exports.loggedUser, admin: true, userId: 1, secret: 'abc123', expires: Date.now() + 600000 },
   secret
 );
 exports.unauthorizedUserToken = jwt.sign(
-  { ...exports.sampleUser, admin: false, userId: 2, expires: Date.now() + 600000, secret: 'abc123' },
+  { ...exports.sampleUser, admin: false, userId: 2, secret: 'abc123', expires: Date.now() + 600000 },
+  secret
+);
+
+exports.expiredUserToken = jwt.sign(
+  { ...exports.sampleUser, admin: true, userId: 1, secret: 'abc123', expires: Date.now() - 600000 },
   secret
 );
