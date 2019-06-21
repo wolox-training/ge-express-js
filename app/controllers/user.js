@@ -1,5 +1,5 @@
 const logger = require('../logger'),
-  { createUser, getUserByEmail, getUsers } = require('../services/user'),
+  { createUser, getUserByEmail, getUsers, createOrUpdateToAdminUser } = require('../services/user'),
   { encrypt, compareEncryptedData } = require('../utils/encrypt'),
   { emailExistsError, emailNotFoundError, authenticationError } = require('../errors'),
   { getUserSessionToken } = require('../services/token');
@@ -33,7 +33,7 @@ exports.signIn = (req, res, next) =>
       }
       return compareEncryptedData(req.body.password, user.password).then(isValid => {
         if (isValid) {
-          const token = getUserSessionToken({ userId: user.id });
+          const token = getUserSessionToken({ userId: user.id, admin: user.admin });
           return res.send(token);
         }
         return next(authenticationError('Unauthorized'));
@@ -41,13 +41,28 @@ exports.signIn = (req, res, next) =>
     })
     .catch(err => {
       logger.error(err);
-      return next();
+      return next(err);
     });
 
 exports.getUsers = (req, res, next) =>
   getUsers({ page: req.query.page })
-    .then(users => res.status(200).send(users))
+    .then(users => res.send(users))
     .catch(err => {
       logger.error(err);
       return next(err);
     });
+
+exports.createAdminUser = (req, res, next) =>
+  encrypt(req.body.password).then(encryptedPassword =>
+    createOrUpdateToAdminUser({
+      name: req.body.name,
+      lastName: req.body.lastName,
+      email: req.body.email,
+      password: encryptedPassword
+    })
+      .then(() => res.send())
+      .catch(err => {
+        logger.error(`Error creating admin user: ${err}`);
+        next(err);
+      })
+  );

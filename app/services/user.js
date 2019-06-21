@@ -24,6 +24,19 @@ exports.getUsers = ({ page }) =>
     return databaseError(err);
   });
 
+exports.createOrUpdateToAdminUser = ({ email, ...otherUserData }) =>
+  User.findOrCreate({ where: { email }, defaults: { ...otherUserData, admin: true } })
+    .then(([user, created]) => {
+      if (!created && !user.admin) {
+        return user.update({ admin: true });
+      }
+      return user;
+    })
+    .catch(err => {
+      logger.error(err);
+      return databaseError(err);
+    });
+
 exports.getUserByEmail = email =>
   User.findOne({ where: { email } }).catch(err => {
     logger.error(err);

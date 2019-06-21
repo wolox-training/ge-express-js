@@ -3,7 +3,7 @@ const { getAlbums, getAlbumPhotos } = require('../services/album'),
 
 exports.getAlbums = (req, res, next) =>
   getAlbums()
-    .then(response => res.status(200).send(response))
+    .then(response => res.send(response))
     .catch(err => {
       logger.error(`Error getting albums: ${err.message}`);
       return next(err);
@@ -11,7 +11,7 @@ exports.getAlbums = (req, res, next) =>
 
 exports.getAlbumPhotos = (req, res, next) =>
   getAlbumPhotos(req.params.id)
-    .then(response => res.status(200).send(response))
+    .then(response => res.send(response))
     .catch(err => {
       logger.error(`Error getting album photos: ${err}`);
       return next(err);

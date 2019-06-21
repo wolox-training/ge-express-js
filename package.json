@@ -60,6 +60,7 @@
     "express-wolox-logger": "0.0.2",
     "jsonwebtoken": "^8.5.1",
     "pg": "^7.4.1",
+    "request": "^2.88.0",
     "request-promise": "^4.2.4",
     "sequelize": "^4.34.0",
     "umzug": "^2.1.0"
