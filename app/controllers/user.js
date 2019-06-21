@@ -1,7 +1,7 @@
 const logger = require('../logger'),
-  { createUser, getUserByEmail } = require('../services/user'),
+  { createUser, getUserByEmail, getUsers } = require('../services/user'),
   { encrypt, compareEncryptedData } = require('../utils/encrypt'),
-  { defaultError, emailExistsError, emailNotFoundError, databaseError } = require('../errors'),
+  { emailExistsError, emailNotFoundError, authenticationError } = require('../errors'),
   { getUserSessionToken } = require('../services/token');
 
 exports.signUp = (req, res, next) =>
@@ -12,7 +12,7 @@ exports.signUp = (req, res, next) =>
         lastName: req.body.lastName,
         email: req.body.email,
         password: encryptedPassword
-      }).catch(err => next(databaseError(err)))
+      })
     )
     .then(([user, created]) => {
       if (created) {
@@ -21,13 +21,12 @@ exports.signUp = (req, res, next) =>
       return next(emailExistsError('Email already in use'));
     })
     .catch(err => {
-      logger.error(`Error creating user: ${err}`);
-      return next(defaultError(err));
+      logger.error(err);
+      return next(err);
     });
 
 exports.signIn = (req, res, next) =>
   getUserByEmail(req.body.email)
-    .catch(err => next(databaseError(err)))
     .then(user => {
       if (!user) {
         return next(emailNotFoundError('Email not found'));
@@ -37,10 +36,18 @@ exports.signIn = (req, res, next) =>
           const token = getUserSessionToken({ userId: user.id });
           return res.send(token);
         }
-        return res.status(401).send('Unauthorized');
+        return next(authenticationError('Unauthorized'));
       });
     })
     .catch(err => {
-      logger.error(`Error signin in: ${err}`);
-      return next(defaultError(err));
+      logger.error(err);
+      return next();
+    });
+
+exports.getUsers = (req, res, next) =>
+  getUsers({ page: req.query.page })
+    .then(users => res.status(200).send(users))
+    .catch(err => {
+      logger.error(err);
+      return next(err);
     });
